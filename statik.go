@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	nameSourceFile = "statik.go"
+	nameSourceFile = "static.go"
 )
 
 var namePackage string
@@ -43,8 +43,9 @@ var (
 	flagNoCompress = flag.Bool("Z", false, "Do not use compression to shrink the files.")
 	flagForce      = flag.Bool("f", false, "Overwrite destination file if it already exists.")
 	flagTags       = flag.String("tags", "", "Write build constraint tags")
-	flagPkg        = flag.String("p", "statik", "Name of the generated package")
-	flagPkgCmt     = flag.String("c", "Package statik contains static assets.", "The package comment. An empty value disables this comment.\n")
+	flagPkg        = flag.String("p", "static", "Name of the generated package")
+	flagPkgCmt     = flag.String("c", "Package contains static assets.", "The package comment. An empty value disables this comment.\n")
+	flagAssetVar   = flag.String("a", "Asset", "Name of pkg-level var with statik data.")
 )
 
 // mtimeDate holds the arbitrary mtime that we assign to files when
@@ -196,16 +197,9 @@ func generateSource(srcPath string) (file *os.File, err error) {
 %s%s
 package %s
 
-import (
-	"github.com/goware/statik/fs"
-)
-
-func init() {
-	data := "`, tags, comment, namePackage)
+var	%s = "`, tags, comment, namePackage, *flagAssetVar)
 	FprintZipData(&qb, buffer.Bytes())
 	fmt.Fprint(&qb, `"
-	fs.Register(data)
-}
 `)
 
 	if err = ioutil.WriteFile(f.Name(), qb.Bytes(), 0644); err != nil {
